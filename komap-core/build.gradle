@@ -1,0 +1,38 @@
+group 'nice.fontaine'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.1.51'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'no.tornado:tornadofx:1.7.9'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'com.natpryce:hamkrest:1.4.2.0'
+    testCompile 'org.mockito:mockito-core:2.5.0'
+    testCompile "com.nhaarman:mockito-kotlin:1.3.0"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}

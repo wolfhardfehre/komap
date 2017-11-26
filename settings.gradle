@@ -1,0 +1,4 @@
+rootProject.name = 'komap'
+include 'komap-core'
+include 'komap-samples'
+
