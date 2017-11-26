@@ -4,6 +4,7 @@
 # gradle/wrapper/gradle-wrapper.properties
 .idea
 .gradle
+/komap-samples/src/main/kotlin/nice.fontaine/app/Tokens.kt
 /komap-samples/out/
 /komap-samples/.gradle/
 /komap-samples/build/
