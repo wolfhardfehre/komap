@@ -2,7 +2,6 @@ package nice.fontaine.models
 
 import java.lang.IllegalArgumentException
 
-
 class GeoPosition(private val latitude: Double,
                   private val longitude: Double) {
 
@@ -19,19 +18,17 @@ class GeoPosition(private val latitude: Double,
     fun getLongitude(): Double = longitude
 
     override fun hashCode(): Int {
-        val prime = 31
         var result = 1
         var temp = longBits(latitude)
-        result = prime * result + (temp xor temp.ushr(32)).toInt()
+        result = 31 * result + (temp xor temp.ushr(32)).toInt()
         temp = longBits(longitude)
-        result = prime * result + (temp xor temp.ushr(32)).toInt()
-        return result
+        return 31 * result + (temp xor temp.ushr(32)).toInt()
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || other !is GeoPosition) return false
-        if (!latitude.equals(other.latitude)) return false
+        if (latitude != other.latitude) return false
         return longBits(longitude) == longBits(other.longitude)
     }
 
