@@ -1,14 +1,14 @@
 package nice.fontaine.processors
 
-import javafx.scene.image.Image
 import nice.fontaine.views.TileGraphic
+import java.net.URL
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
+import javax.imageio.ImageIO
 
 class TileLoader {
-
     private val threadPoolSize = Runtime.getRuntime().availableProcessors()
     private val service = Executors.newFixedThreadPool(threadPoolSize, TileThreadFactory())
     private val tileQueue: BlockingQueue<TileGraphic> = LinkedBlockingQueue<TileGraphic>()
@@ -36,11 +36,10 @@ class TileLoader {
     }
 
     private inner class TileRunner : Runnable {
-
         override fun run() {
             val tile = tileQueue.remove()
-            val url = tile.url()
-            val image = Image(url)
+            val url = URL(tile.url())
+            val image = ImageIO.read(url)
             tile.change(image)
         }
     }

@@ -1,17 +1,19 @@
 package nice.fontaine.models
 
-import javafx.geometry.Point2D
+import java.awt.geom.Point2D
+
 
 abstract class TileInfo(
         internal val baseURL: String,
         private val tileSize: Int = 256,
         private val minZoom: Int = 1,
-        private val maxZoom: Int = 17,
-        private val totalZoom: Int = 19) {
+        private val maxZoom: Int = 19,
+        private val totalZoom: Int = 19
+) {
 
     private val longitudeDegreeWidthInPixels: DoubleArray = DoubleArray(totalZoom + 1)
     private val longitudeRadianWidthInPixels: DoubleArray = DoubleArray(totalZoom + 1)
-    private val mapCenterInPixelsAtZoom: Array<Point2D> = Array(totalZoom + 1, { _ -> Point2D.ZERO })
+    private val mapCenterInPixelsAtZoom: Array<Point2D> = Array(totalZoom + 1) { Point2D.Double(0.0, 0.0) }
     private val mapWidthInTilesAtZoom: IntArray = IntArray(totalZoom + 1)
 
     init {
@@ -20,7 +22,7 @@ abstract class TileInfo(
             longitudeDegreeWidthInPixels[value] = current / 360.0
             longitudeRadianWidthInPixels[value] = current / (2.0 * Math.PI)
             val t2 = current / 2.0
-            mapCenterInPixelsAtZoom[value] = Point2D(t2, t2)
+            mapCenterInPixelsAtZoom[value] = Point2D.Double(t2, t2)
             mapWidthInTilesAtZoom[value] = current / tileSize
             current *= 2
         }

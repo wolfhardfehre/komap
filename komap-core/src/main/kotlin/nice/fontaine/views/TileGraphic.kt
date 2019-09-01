@@ -1,28 +1,32 @@
 package nice.fontaine.views
 
-import javafx.scene.canvas.GraphicsContext
-import javafx.scene.image.Image
 import nice.fontaine.models.CCoord
+import java.awt.Graphics
+import java.awt.Image
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.imageio.ImageIO
 
-class TileGraphic(private val url: String,
-                  private var coord: CCoord,
-                  overlay: GraphicOverlay) : Graphic(overlay) {
+const val FILE_NAME = "images/loading.png"
 
+class TileGraphic(
+        private val url: String,
+        private var coord: CCoord,
+        overlay: GraphicOverlay
+) : Graphic(overlay) {
     private var loading = AtomicBoolean(false)
-    private var image: Image = Image("file: images/loading.png")//Image(javaClass.getResourceAsStream("images/loading.png"))
+    private val default_image = object {}::class.java.classLoader.getResource(FILE_NAME)
+    private var image: Image = ImageIO.read(default_image)
 
     override fun invalidate() {
         overlay.invalidate()
     }
 
-    override fun contains(other: CCoord): Boolean {
-        return coord.x < other.x && coord.x + image.width > other.x &&
-                coord.y < other.y && coord.y + image.height > other.y
-    }
+    override fun contains(other: CCoord): Boolean = coord.x < other.x &&
+            coord.x + image.getWidth(null) > other.x &&
+            coord.y < other.y && coord.y + image.getHeight(null) > other.y
 
-    override fun draw(context: GraphicsContext) {
-        context.drawImage(image, coord.x, coord.y)
+    override fun draw(context: Graphics) {
+        context.drawImage(image, coord.x, coord.y, null)
     }
 
     override fun moveTo(coord: CCoord) {

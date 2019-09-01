@@ -1,57 +1,50 @@
 package nice.fontaine.listeners
 
-import javafx.event.EventHandler
-import javafx.geometry.Point2D
-import javafx.scene.Cursor
-import javafx.scene.input.*
 import nice.fontaine.map.MapCanvas
+import java.awt.Cursor
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
+import java.awt.event.MouseMotionListener
+import java.awt.geom.Point2D
 
-class PanListener(private val canvas: MapCanvas) : EventHandler<MouseEvent> {
-
+class PanListener(private val canvas: MapCanvas) : MouseListener, MouseMotionListener {
     private var previous: MouseEvent? = null
     private var priorCursor: Cursor? = null
 
-    override fun handle(event: MouseEvent?) {
-        if (event == null || event.button != MouseButton.PRIMARY) return
-        when (event.eventType) {
-            MouseEvent.MOUSE_PRESSED -> press(event)
-            MouseEvent.MOUSE_DRAGGED -> drag(event)
-            MouseEvent.MOUSE_RELEASED -> release(event)
-        }
-    }
-
-    private fun press(event: MouseEvent) {
-        previous = event
-        priorCursor = canvas.cursor
-    }
-
-    private fun release(event: MouseEvent) {
-        previous = null
-        canvas.cursor = priorCursor
-    }
-
-    private fun drag(event: MouseEvent) {
-        var x = canvas.getCenter().x
-        var y = canvas.getCenter().y
-
+    override fun mouseDragged(event: MouseEvent?) {
+        if (event == null || event.button != MouseEvent.NOBUTTON) return
+        val center = canvas.getCenter()
+        var x = center.x
+        var y = center.y
         if (previous != null) {
             x += (previous!!.x - event.x)
             y += (previous!!.y - event.y)
         }
-
-        val maxHeight = maxHeight()
-        if (y < 0) y = 0.0
-        if (y > maxHeight) y = maxHeight
+        val factory = canvas.getTileFactory()
+        val zoom = canvas.getZoom()
+        y = factory.recomputeY(zoom, y)
 
         previous = event
-        canvas.setCenter(Point2D(x, y))
+        canvas.setCenter(Point2D.Double(x, y))
         canvas.draw()
     }
 
-    private fun maxHeight(): Double {
-        val factory = canvas.getTileFactory()
-        val mapSize = factory.getMapSize(canvas.getZoom())
-        val tileSize = factory.getTileSize()
-        return mapSize.getHeight() * tileSize
+    override fun mouseReleased(event: MouseEvent?) {
+        previous = null
+        canvas.cursor = priorCursor
     }
+
+    override fun mousePressed(event: MouseEvent?) {
+        if (event == null || event.button != MouseEvent.NOBUTTON) return
+        previous = event
+        priorCursor = canvas.cursor
+    }
+
+    override fun mouseMoved(event: MouseEvent?) {}
+
+    override fun mouseEntered(event: MouseEvent?) {}
+
+    override fun mouseClicked(event: MouseEvent?) {}
+
+    override fun mouseExited(event: MouseEvent?) {}
 }

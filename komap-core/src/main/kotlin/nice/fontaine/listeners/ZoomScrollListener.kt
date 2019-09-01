@@ -1,13 +1,12 @@
 package nice.fontaine.listeners
 
-import javafx.event.EventHandler
-import javafx.geometry.Point2D
-import javafx.scene.input.ScrollEvent
 import nice.fontaine.map.MapCanvas
+import java.awt.event.MouseWheelEvent
+import java.awt.event.MouseWheelListener
+import java.awt.geom.Point2D
 
-class ZoomScrollListener(private val canvas: MapCanvas) : EventHandler<ScrollEvent> {
-
-    override fun handle(event: ScrollEvent?) {
+class ZoomScrollListener(private val canvas: MapCanvas) : MouseWheelListener {
+    override fun mouseWheelMoved(event: MouseWheelEvent?) {
         if (event == null) return
         val bound = canvas.getViewportBounds()
 
@@ -15,7 +14,7 @@ class ZoomScrollListener(private val canvas: MapCanvas) : EventHandler<ScrollEve
         val dy = event.y - bound.height / 2
 
         val oldMapSize = canvas.getTileFactory().getMapSize(canvas.getZoom())
-        val delta = -(event.deltaY / Math.abs(event.deltaY)).toInt()
+        val delta = -(event.scrollAmount / Math.abs(event.scrollAmount))
         canvas.setZoom(canvas.getZoom() + delta)
 
         val mapSize = canvas.getTileFactory().getMapSize(canvas.getZoom())
@@ -28,7 +27,7 @@ class ZoomScrollListener(private val canvas: MapCanvas) : EventHandler<ScrollEve
         val x = center.getX() + dx * (dzw - 1)
         val y = center.getY() + dy * (dzh - 1)
 
-        canvas.setCenter(Point2D(x, y))
+        canvas.setCenter(Point2D.Double(x, y))
         canvas.draw()
     }
 }

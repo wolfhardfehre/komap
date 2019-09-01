@@ -1,28 +1,28 @@
 package nice.fontaine.map
 
-import javafx.geometry.Dimension2D
-import javafx.geometry.Point2D
-import javafx.geometry.Rectangle2D
 import nice.fontaine.models.GeoPosition
 import nice.fontaine.processors.TileProcessor
 import nice.fontaine.utils.GeoUtil
 import nice.fontaine.views.GraphicOverlay
 import nice.fontaine.processors.TileFactory
+import java.awt.geom.Dimension2D
+import java.awt.geom.Point2D
+import java.awt.geom.Rectangle2D
 
-class MapPresenter(private val canvas: MapCanvas,
-                   private val factory: TileFactory,
-                   private val overlay: GraphicOverlay)
-    : MapContract.Presenter {
-
-    private var zoom: Int = 10
+class MapPresenter(
+        private val canvas: MapCanvas,
+        private val factory: TileFactory,
+        private val overlay: GraphicOverlay
+) : MapContract.Presenter {
+    private var zoom: Int = 16
     private var address = GeoPosition(52.474476, 13.402944)
     private var center = factory.geoToPixel(address, zoom)
     private val processor: TileProcessor = TileProcessor(factory, overlay, canvas)
-    private val context = canvas.graphicsContext2D
 
     override fun drawTiles(bounds: Rectangle2D) {
         processor.process(bounds, zoom)
-        context.clearRect(0.0, 0.0, bounds.width, bounds.height)
+        val context = canvas.graphics
+        context.clearRect(0, 0, bounds.width.toInt(), bounds.height.toInt())
         overlay.draw(context)
     }
 
@@ -59,7 +59,7 @@ class MapPresenter(private val canvas: MapCanvas,
     }
 
     private fun computeCenter(oldCenter: Point2D, mapSize: Dimension2D, oldMapSize: Dimension2D): Point2D {
-        return Point2D(
+        return Point2D.Double(
                 oldCenter.x * (mapSize.width / oldMapSize.width),
                 oldCenter.y * (mapSize.height / oldMapSize.height))
     }
@@ -72,12 +72,12 @@ class MapPresenter(private val canvas: MapCanvas,
         this.center = center
     }
 
-    override fun calculateViewportBounds(width: Double, height: Double): Rectangle2D {
+    override fun calculateViewportBounds(width: Int, height: Int): Rectangle2D {
         val (viewportX, viewportY) = Pair(center.x - width / 2, center.y - height / 2)
-        return Rectangle2D(viewportX, viewportY, width, height)
+        return Rectangle2D.Double(viewportX, viewportY, width.toDouble(), height.toDouble())
     }
 
-    override fun zoomToBestFit(positions: Set<GeoPosition>, maxFraction: Double, width: Double, height: Double) {
+    override fun zoomToBestFit(positions: Set<GeoPosition>, maxFraction: Double, width: Int, height: Int) {
         if (positions.isEmpty()) return
         if (maxFraction <= 0 || maxFraction > 1) throw IllegalArgumentException("maxFraction must be between 0 and 1")
 
@@ -85,7 +85,7 @@ class MapPresenter(private val canvas: MapCanvas,
         var bounds = generateBoundingRect(positions)
 
         val (centerX, centerY) = Pair(bounds.minX + bounds.width / 2, bounds.minY + bounds.height / 2)
-        val bc = Point2D(centerX, centerY)
+        val bc = Point2D.Double(centerX, centerY)
         val center = factory.pixelToGeo(bc, getZoom())
         setCenterPosition(center)
 
@@ -104,9 +104,8 @@ class MapPresenter(private val canvas: MapCanvas,
         setZoom(bestZoom)
     }
 
-    private fun generateBoundingRect(positions: Set<GeoPosition>): Rectangle2D {
-        return GeoUtil.boundingBox(positions, factory, zoom)
-    }
+    private fun generateBoundingRect(positions: Set<GeoPosition>): Rectangle2D =
+            GeoUtil.boundingBox(positions, factory, zoom)
 
     private fun setCenterPosition(geoPosition: GeoPosition) {
         setCenter(factory.geoToPixel(geoPosition, zoom))

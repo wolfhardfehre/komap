@@ -1,21 +1,22 @@
 package nice.fontaine.utils
 
-import javafx.geometry.Dimension2D
-import javafx.geometry.Point2D
-import javafx.geometry.Rectangle2D
 import nice.fontaine.map.MapCanvas
 import nice.fontaine.models.GeoBounds
 import nice.fontaine.models.GeoPosition
 import nice.fontaine.models.TileInfo
 import nice.fontaine.processors.TileFactory
+import java.awt.Dimension
+import java.awt.geom.Dimension2D
+import java.awt.geom.Point2D
+import java.awt.geom.Rectangle2D
 import java.lang.Math.*
 import java.util.HashSet
 
 object GeoUtil {
 
     fun getMapSize(zoom: Int, info: TileInfo): Dimension2D {
-        val size = info.mapWidthInTilesAt(zoom)
-        return Dimension2D(size, size)
+        val size = info.mapWidthInTilesAt(zoom).toInt()
+        return Dimension(size, size)
     }
 
     fun isValidTile(x: Int, y: Int, zoom: Int, info: TileInfo): Boolean {
@@ -30,7 +31,7 @@ object GeoUtil {
         var e = Math.sin(Math.toRadians(position.getLatitude()))
         e = clamp(e, -0.9999, 0.9999)
         val y = info.centerPxAt(zoom).y + 0.5 * Math.log((1 + e) / (1 - e)) * -1 * info.widthInRad(zoom)
-        return Point2D(x, y)
+        return Point2D.Double(x, y)
     }
 
     fun clamp(x: Double, lower: Double, upper: Double): Double = if (x < lower) lower else if (x > upper) upper else x
@@ -54,9 +55,8 @@ object GeoUtil {
             if (point.y > maxY) maxY = point.y
         }
 
-        return Rectangle2D(minX, minY, maxX - minX, maxY - minY)
+        return Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY)
     }
-
 
     fun maxRange(): Pair<Double, Double> = Pair(Double.MAX_VALUE, Double.MIN_VALUE)
 
@@ -74,9 +74,9 @@ object GeoUtil {
         val tileFactory = mapCanvas.getTileFactory()
         val zoom = mapCanvas.getZoom()
         val bounds = mapCanvas.getViewportBounds()
-        var pt = Point2D(bounds.minX, bounds.minY)
+        var pt = Point2D.Double(bounds.minX, bounds.minY)
         set.add(tileFactory.pixelToGeo(pt, zoom))
-        pt = Point2D(bounds.minX + bounds.width, bounds.minY + bounds.height)
+        pt = Point2D.Double(bounds.minX + bounds.width, bounds.minY + bounds.height)
         set.add(tileFactory.pixelToGeo(pt, zoom))
         return GeoBounds(set)
     }

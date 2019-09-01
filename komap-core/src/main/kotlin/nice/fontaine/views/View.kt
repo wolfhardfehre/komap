@@ -1,8 +1,8 @@
 package nice.fontaine.views
 
-import javafx.scene.canvas.GraphicsContext
+import java.awt.Graphics
 
 interface View {
-    fun draw(context: GraphicsContext)
+    fun draw(context: Graphics)
     fun invalidate()
 }

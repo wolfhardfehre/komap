@@ -1,7 +1,5 @@
 package nice.fontaine.models
 
-import java.lang.IllegalArgumentException
-
 class GeoPosition(private val latitude: Double,
                   private val longitude: Double) {
 

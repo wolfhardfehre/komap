@@ -1,16 +1,16 @@
 package nice.fontaine.map
 
-import javafx.geometry.Bounds
-import javafx.geometry.Point2D
-import javafx.geometry.Rectangle2D
 import nice.fontaine.models.GeoPosition
 import nice.fontaine.processors.TileFactory
+import java.awt.Rectangle
+import java.awt.geom.Point2D
+import java.awt.geom.Rectangle2D
 
 interface MapContract {
 
     interface View {
         fun draw()
-        fun getCanvasBounds(): Bounds
+        fun getCanvasBounds(): Rectangle
     }
 
     interface Presenter {
@@ -23,12 +23,12 @@ interface MapContract {
         fun setZoom(zoom: Int)
 
         fun getCenterPosition(): GeoPosition
-        fun zoomToBestFit(positions: Set<GeoPosition>, maxFraction: Double, width: Double, height: Double)
+        fun zoomToBestFit(positions: Set<GeoPosition>, maxFraction: Double, width: Int, height: Int)
 
         fun getCenter(): Point2D
         fun setCenter(center: Point2D)
 
-        fun calculateViewportBounds(width: Double, height: Double): Rectangle2D
+        fun calculateViewportBounds(width: Int, height: Int): Rectangle2D
 
         fun getTileFactory(): TileFactory
     }
