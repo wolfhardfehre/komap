@@ -5,7 +5,7 @@ import nice.fontaine.utils.GeoUtil
 import nice.fontaine.utils.mod
 import nice.fontaine.views.GraphicOverlay
 import nice.fontaine.views.TileGraphic
-import java.awt.geom.Dimension2D
+import java.awt.Dimension
 import java.awt.geom.Point2D
 import java.util.*
 
@@ -13,11 +13,11 @@ class TileFactory(private var info: TileInfo) {
     private val tileCache = Collections.synchronizedMap(LruCache<String, TileGraphic>(200))
     private val loader = TileLoader()
 
-    fun getInfo(): TileInfo = info
+    fun info(): TileInfo = info
 
-    fun getTileSize(): Int = info.getTileSize()
+    fun tileSize(): Int = info.tileSize
 
-    fun getMapSize(zoom: Int): Dimension2D = GeoUtil.getMapSize(zoom, info)
+    fun mapSize(zoom: Int): Dimension = GeoUtil.getMapSize(zoom, info)
 
     fun pixelToGeo(pixelCoordinate: Point2D, zoom: Int): GeoPosition =
             GeoUtil.pixelToGeo(pixelCoordinate, zoom, info)
@@ -29,7 +29,7 @@ class TileFactory(private var info: TileInfo) {
         val tileX = recomputeX(tileCoord.x, zoom)
         val url = info.getTileUrl(tileX, tileCoord.y, zoom)
         if (tileCache.containsKey(url)) {
-            val tile = tileCache.get(url)!!
+            val tile = tileCache[url]!!
             if (!tile.loading()) tile.moveTo(canvasCoord)
             return tile
         }
@@ -38,11 +38,11 @@ class TileFactory(private var info: TileInfo) {
     }
 
     fun recomputeY(zoom: Int, y: Double): Double {
-        val tileSize = getTileSize()
-        val mapSize = getMapSize(zoom)
+        val tileSize = tileSize()
+        val mapSize = mapSize(zoom)
         val maxHeight = mapSize.height * tileSize - tileSize
         if (y < tileSize) return tileSize.toDouble()
-        if (y > maxHeight) return maxHeight
+        if (y > maxHeight) return maxHeight.toDouble()
         return y
     }
 
@@ -56,7 +56,7 @@ class TileFactory(private var info: TileInfo) {
         val tile = TileGraphic(url, canvasCoord, overlay)
         if (isValidTile(tileCoord, zoom)) {
             loader.load(tile)
-            tileCache.put(url, tile)
+            tileCache[url] = tile
         }
         return tile
     }
@@ -66,7 +66,7 @@ class TileFactory(private var info: TileInfo) {
 
     private fun recomputeX(x: Int, zoom: Int): Int {
         var tileX = x
-        val numTilesWide = getMapSize(zoom).width.toInt()
+        val numTilesWide = mapSize(zoom).width
         if (tileX < 0) tileX = mod(tileX, numTilesWide)
         tileX %= numTilesWide
         return tileX

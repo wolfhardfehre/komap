@@ -1,81 +1,58 @@
 package nice.fontaine
 
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.spy
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
-import javafx.geometry.Dimension2D
-import javafx.geometry.Point2D
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import nice.fontaine.map.MapCanvas
 import nice.fontaine.map.MapPresenter
 import nice.fontaine.models.GeoPosition
 import nice.fontaine.models.TileInfo
 import nice.fontaine.views.GraphicOverlay
 import nice.fontaine.processors.TileFactory
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
+import java.awt.geom.Point2D
 
 class MapPresenterTest {
-
-    private val view: MapCanvas = mock()
-    private val factory: TileFactory = mock()
-    private val overlay: GraphicOverlay = mock()
-    private val info: TileInfo = mock()
-    private val size: Dimension2D = mock()
+    private val canvas: MapCanvas = mockk(relaxed = true)
+    private val factory: TileFactory = mockk(relaxed = true)
+    private val overlay: GraphicOverlay = mockk(relaxed = true)
+    private val info: TileInfo = mockk(relaxed = true)
     private lateinit var presenter: MapPresenter
 
-    @Before
-    fun setup() {
-        presenter = MapPresenter(view, factory, overlay)
+    @Before fun setup() {
+        presenter = MapPresenter(canvas, factory, overlay)
     }
 
-    @Test
-    fun setFocus() {
-        // given
-        val position: GeoPosition = mock()
-        Mockito.`when`(factory.geoToPixel(position, 10)).thenReturn(Point2D(0.0, 0.0))
+    @Test fun `should get address when focus changed`() {
+        val position: GeoPosition = mockk()
+        val pixel = Point2D.Double(0.0, 0.0)
+        every { factory.geoToPixel(position, 16) } returns pixel
 
-        // when
         presenter.focusAddress(position)
 
-        // then
-        verify(factory, times(1)).geoToPixel(position, 10)
-        verify(view, times(1)).draw()
-        Assert.assertEquals(position, presenter.getAddress())
+        verify { factory.geoToPixel(position, 16) }
+        verify { canvas.draw() }
+        assertThat(presenter.getAddress()).isEqualTo(position)
     }
 
-    @Test
-    fun setCenter() {
-        // given
-        val point2D: Point2D = mock()
+    @Test fun `should have correct center when set`() {
+        val point2D: Point2D = mockk()
 
-        // when
         presenter.setCenter(point2D)
 
-        // then
-        verify(view, times(1)).draw()
-        Assert.assertEquals(point2D, presenter.getCenter())
+        assertThat(presenter.getCenter()).isEqualTo(point2D)
     }
 
-    @Test
-    fun setZoom() {
-        // given
-        val spy = spy(presenter);
-        Mockito.`when`(size.width).thenReturn(200.0)
-        Mockito.`when`(size.height).thenReturn(200.0)
-        Mockito.`when`(info.getMaxZoom()).thenReturn(20)
-        Mockito.`when`(info.getMinZoom()).thenReturn(1)
-        Mockito.`when`(factory.getInfo()).thenReturn(info)
-        Mockito.`when`(factory.getMapSize(4)).thenReturn(size)
-        Mockito.`when`(factory.getMapSize(10)).thenReturn(size)
-        Mockito.`when`(spy.getCenter()).thenReturn(Point2D(10.0, 10.0))
+    @Test fun `should get zoom when zoom changed`() {
+        every { info.getMinZoom() } returns 0
+        every { info.getMaxZoom() } returns 20
+        every { factory.info() } returns info
 
-        // when
-        spy.setZoom(4)
+        presenter.setZoom(4)
 
-        // then
-        Assert.assertEquals(4, spy.getZoom())
+        assertThat(presenter.getZoom()).isEqualTo(4)
     }
 }

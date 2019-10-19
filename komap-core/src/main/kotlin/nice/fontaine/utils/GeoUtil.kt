@@ -6,40 +6,45 @@ import nice.fontaine.models.GeoPosition
 import nice.fontaine.models.TileInfo
 import nice.fontaine.processors.TileFactory
 import java.awt.Dimension
-import java.awt.geom.Dimension2D
 import java.awt.geom.Point2D
 import java.awt.geom.Rectangle2D
-import java.lang.Math.*
 import java.util.HashSet
+import kotlin.math.*
 
 object GeoUtil {
 
-    fun getMapSize(zoom: Int, info: TileInfo): Dimension2D {
-        val size = info.mapWidthInTilesAt(zoom).toInt()
+    fun getMapSize(zoom: Int, info: TileInfo): Dimension {
+        val size = info.mapWidthInTilesAt(zoom)
         return Dimension(size, size)
     }
 
-    fun isValidTile(x: Int, y: Int, zoom: Int, info: TileInfo): Boolean {
-        if (x < 0 || y < 0) return false
-        if (info.centerPxAt(zoom).x * 2 <= x * info.getTileSize()) return false
-        if (info.centerPxAt(zoom).y * 2 <= y * info.getTileSize()) return false
-        return !(zoom < info.getMinZoom() || zoom > info.getMaxZoom())
-    }
+    fun isValidTile(x: Int, y: Int, zoom: Int, info: TileInfo): Boolean =
+            when {
+                x < 0 || y < 0 -> false
+                info.centerPxAt(zoom).x * 2 <= x * info.tileSize -> false
+                info.centerPxAt(zoom).y * 2 <= y * info.tileSize -> false
+                else -> zoom >= info.getMinZoom() && zoom <= info.getMaxZoom()
+            }
 
     fun geoToPixel(position: GeoPosition, zoom: Int, info: TileInfo): Point2D {
         val x = info.centerPxAt(zoom).x + position.getLongitude() * info.widthInDeg(zoom)
-        var e = Math.sin(Math.toRadians(position.getLatitude()))
+        var e = sin(position.getLatitude().toRadians())
         e = clamp(e, -0.9999, 0.9999)
-        val y = info.centerPxAt(zoom).y + 0.5 * Math.log((1 + e) / (1 - e)) * -1 * info.widthInRad(zoom)
+        val y = info.centerPxAt(zoom).y + 0.5 * ln((1 + e) / (1 - e)) * -info.widthInRad(zoom)
         return Point2D.Double(x, y)
     }
 
-    fun clamp(x: Double, lower: Double, upper: Double): Double = if (x < lower) lower else if (x > upper) upper else x
+    fun clamp(x: Double, lower: Double, upper: Double): Double =
+            when {
+                x < lower -> lower
+                x > upper -> upper
+                else -> x
+            }
 
     fun pixelToGeo(coordinate: Point2D, zoom: Int, info: TileInfo): GeoPosition {
         val lon = (coordinate.x - info.centerPxAt(zoom).x) / info.widthInDeg(zoom)
         val e1 = (coordinate.y - info.centerPxAt(zoom).y) / -info.widthInRad(zoom)
-        val lat = Math.toDegrees(2 * atan(exp(e1)) - PI / 2)
+        val lat = (2 * atan(exp(e1)) - PI / 2).toDegrees()
         return GeoPosition(lat, lon)
     }
 
@@ -62,12 +67,14 @@ object GeoUtil {
 
     fun resolution(lat: Double, tileSize: Int, zoom: Int): Double {
         val horizontalTileSize = 40075016.686 / tileSize
-        return horizontalTileSize * Math.cos(lat) / Math.pow(2.0, zoom.toDouble())
+        return horizontalTileSize * cos(lat) / 2.0.pow(zoom.toDouble())
     }
 
-    fun getMapBounds(mapCanvas: MapCanvas): GeoBounds {
-        return getMapGeoBounds(mapCanvas)
-    }
+    fun getMapBounds(mapCanvas: MapCanvas): GeoBounds = getMapGeoBounds(mapCanvas)
+
+    private fun Double.toDegrees(): Double = this * 180.0 / PI
+
+    private fun Double.toRadians(): Double = this / 180.0 * PI
 
     private fun getMapGeoBounds(mapCanvas: MapCanvas): GeoBounds {
         val set = HashSet<GeoPosition>()

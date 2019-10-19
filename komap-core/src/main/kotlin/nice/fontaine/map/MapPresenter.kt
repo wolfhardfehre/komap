@@ -32,7 +32,8 @@ class MapPresenter(
 
     override fun focusAddress(addressLocation: GeoPosition) {
         this.address = addressLocation
-        setCenter(factory.geoToPixel(addressLocation, getZoom()))
+        val center = factory.geoToPixel(addressLocation, zoom)
+        setCenter(center)
         canvas.draw()
     }
 
@@ -45,24 +46,24 @@ class MapPresenter(
     }
 
     private fun zoomOutOfRange(zoom: Int): Boolean {
-        val info = factory.getInfo()
+        val info = factory.info()
         return !(zoom >= info.getMinZoom() && zoom <= info.getMaxZoom())
     }
 
     private fun recomputeCenter(zoom: Int) {
-        val mapSize = factory.getMapSize(zoom)
-        val oldMapSize = factory.getMapSize(this.zoom)
+        val mapSize = factory.mapSize(zoom)
+        val oldMapSize = factory.mapSize(this.zoom)
 
         val oldCenter = getCenter()
         val newCenter = computeCenter(oldCenter, mapSize, oldMapSize)
         setCenter(newCenter)
     }
 
-    private fun computeCenter(oldCenter: Point2D, mapSize: Dimension2D, oldMapSize: Dimension2D): Point2D {
-        return Point2D.Double(
+    private fun computeCenter(oldCenter: Point2D, mapSize: Dimension2D, oldMapSize: Dimension2D): Point2D =
+            Point2D.Double(
                 oldCenter.x * (mapSize.width / oldMapSize.width),
-                oldCenter.y * (mapSize.height / oldMapSize.height))
-    }
+                oldCenter.y * (mapSize.height / oldMapSize.height)
+            )
 
     override fun getCenterPosition(): GeoPosition = factory.pixelToGeo(getCenter(), zoom)
 
@@ -81,7 +82,7 @@ class MapPresenter(
         if (positions.isEmpty()) return
         if (maxFraction <= 0 || maxFraction > 1) throw IllegalArgumentException("maxFraction must be between 0 and 1")
 
-        val info = factory.getInfo()
+        val info = factory.info()
         var bounds = generateBoundingRect(positions)
 
         val (centerX, centerY) = Pair(bounds.minX + bounds.width / 2, bounds.minY + bounds.height / 2)

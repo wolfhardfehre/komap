@@ -13,11 +13,11 @@ class ZoomScrollListener(private val canvas: MapCanvas) : MouseWheelListener {
         val dx = event.x - bound.width / 2
         val dy = event.y - bound.height / 2
 
-        val oldMapSize = canvas.getTileFactory().getMapSize(canvas.getZoom())
+        val oldMapSize = canvas.getTileFactory().mapSize(canvas.getZoom())
         val delta = -(event.scrollAmount / Math.abs(event.scrollAmount))
         canvas.setZoom(canvas.getZoom() + delta)
 
-        val mapSize = canvas.getTileFactory().getMapSize(canvas.getZoom())
+        val mapSize = canvas.getTileFactory().mapSize(canvas.getZoom())
 
         val center = canvas.getCenter()
 

@@ -12,7 +12,7 @@ class TileProcessor(
         private val canvas: JFrame
 ) {
     fun process(bounds: Rectangle2D, zoom: Int) {
-        val tileSize = factory.getTileSize()
+        val tileSize = factory.tileSize()
         val (width, height) = Pair(bounds.width / tileSize, bounds.height / tileSize)
         val (dx, dy) = Pair(bounds.minX / tileSize, bounds.minY / tileSize)
 
@@ -39,7 +39,7 @@ class TileProcessor(
     }
 
     private fun isTileOnMap(tileCoord: TCoord, zoom: Int): Boolean {
-        val mapSize = factory.getMapSize(zoom)
+        val mapSize = factory.mapSize(zoom)
         return tileCoord.y >= 0 && tileCoord.y < mapSize.height
     }
 
