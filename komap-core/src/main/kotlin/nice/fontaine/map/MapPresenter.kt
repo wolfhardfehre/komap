@@ -47,7 +47,7 @@ class MapPresenter(
 
     private fun zoomOutOfRange(zoom: Int): Boolean {
         val info = factory.info()
-        return !(zoom >= info.getMinZoom() && zoom <= info.getMaxZoom())
+        return !info.isValidZoom(zoom)
     }
 
     private fun recomputeCenter(zoom: Int) {
@@ -91,7 +91,7 @@ class MapPresenter(
         setCenterPosition(center)
 
         if (positions.size == 1) return
-        setZoom(info.getMaxZoom())
+        setZoom(info.maxZoom)
         var bestZoom = getZoom()
         val viewport = calculateViewportBounds(width, height)
         while (true) {
@@ -99,7 +99,7 @@ class MapPresenter(
             if (bounds.width < viewport.width * maxFraction && bounds.height < viewport.height * maxFraction) {
                 bestZoom = getZoom()
             } else break
-            if (getZoom() == info.getMinZoom()) break
+            if (getZoom() == info.minZoom) break
             else setZoom(getZoom() - 1)
         }
         setZoom(bestZoom)

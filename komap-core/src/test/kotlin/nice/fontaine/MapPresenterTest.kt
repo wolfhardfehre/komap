@@ -47,8 +47,7 @@ class MapPresenterTest {
     }
 
     @Test fun `should get zoom when zoom changed`() {
-        every { info.getMinZoom() } returns 0
-        every { info.getMaxZoom() } returns 20
+        every { info.isValidZoom(4) } returns true
         every { factory.info() } returns info
 
         presenter.setZoom(4)

@@ -6,11 +6,10 @@ import java.awt.geom.Point2D
 abstract class TileInfo(
         internal val baseURL: String,
         val tileSize: Int = 256,
-        private val minZoom: Int = 1,
-        private val maxZoom: Int = 19,
-        private val totalZoom: Int = 19
+        val minZoom: Int = 1,
+        val maxZoom: Int = 19,
+        val totalZoom: Int = 19
 ) {
-
     private val longitudeDegreeWidthInPixels: DoubleArray = DoubleArray(totalZoom + 1)
     private val longitudeRadianWidthInPixels: DoubleArray = DoubleArray(totalZoom + 1)
     private val mapCenterInPixelsAtZoom: Array<Point2D> = Array(totalZoom + 1) { Point2D.Double(0.0, 0.0) }
@@ -28,15 +27,9 @@ abstract class TileInfo(
         }
     }
 
-    abstract fun getTileUrl(x: Int, y: Int, zoom: Int): String
+    abstract fun tileUrl(x: Int, y: Int, zoom: Int): String
 
-    fun tileSize(): Int = tileSize
-
-    fun getMinZoom(): Int = minZoom
-
-    fun getMaxZoom(): Int = maxZoom
-
-    fun getTotalZoom(): Int = totalZoom
+    fun isValidZoom(zoom: Int): Boolean = zoom in minZoom..maxZoom
 
     fun mapWidthInTilesAt(zoom: Int): Int = mapWidthInTilesAtZoom[zoom]
 

@@ -14,7 +14,7 @@ class TileLoader {
     private val tileQueue: BlockingQueue<TileGraphic> = LinkedBlockingQueue<TileGraphic>()
 
     fun load(tile: TileGraphic) {
-        if (tile.loading()) return
+        if (tile.isLoading) return
         tile.setLoading()
         try {
             tileQueue.put(tile)
@@ -38,9 +38,9 @@ class TileLoader {
     private inner class TileRunner : Runnable {
         override fun run() {
             val tile = tileQueue.remove()
-            val url = URL(tile.url())
+            val url = URL(tile.url)
             val image = ImageIO.read(url)
-            tile.change(image)
+            tile.changeImage(image)
         }
     }
 }

@@ -27,10 +27,10 @@ class TileFactory(private var info: TileInfo) {
 
     fun getTile(overlay: GraphicOverlay, tileCoord: TCoord, canvasCoord: CCoord, zoom: Int): TileGraphic {
         val tileX = recomputeX(tileCoord.x, zoom)
-        val url = info.getTileUrl(tileX, tileCoord.y, zoom)
+        val url = info.tileUrl(tileX, tileCoord.y, zoom)
         if (tileCache.containsKey(url)) {
             val tile = tileCache[url]!!
-            if (!tile.loading()) tile.moveTo(canvasCoord)
+            if (!tile.isLoading) tile.moveTo(canvasCoord)
             return tile
         }
         println(url)

@@ -23,12 +23,12 @@ object GeoUtil {
                 x < 0 || y < 0 -> false
                 info.centerPxAt(zoom).x * 2 <= x * info.tileSize -> false
                 info.centerPxAt(zoom).y * 2 <= y * info.tileSize -> false
-                else -> zoom >= info.getMinZoom() && zoom <= info.getMaxZoom()
+                else -> info.isValidZoom(zoom)
             }
 
     fun geoToPixel(position: GeoPosition, zoom: Int, info: TileInfo): Point2D {
-        val x = info.centerPxAt(zoom).x + position.getLongitude() * info.widthInDeg(zoom)
-        var e = sin(position.getLatitude().toRadians())
+        val x = info.centerPxAt(zoom).x + position.longitude * info.widthInDeg(zoom)
+        var e = sin(position.latitude.toRadians())
         e = clamp(e, -0.9999, 0.9999)
         val y = info.centerPxAt(zoom).y + 0.5 * ln((1 + e) / (1 - e)) * -info.widthInRad(zoom)
         return Point2D.Double(x, y)

@@ -6,7 +6,7 @@ import nice.fontaine.models.MapBox
 import nice.fontaine.processors.TileFactory
 import javax.swing.SwingUtilities
 
-fun main(args: Array<String>) {
+fun main() {
     val info = MapBox(MAPBOX, MapBox.Base.STREETS_SATELLITE)
     val frankfurt = GeoPosition(50.11, 8.68)
 

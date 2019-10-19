@@ -130,8 +130,8 @@ class GeoUtilTest {
         val actual = GeoUtil.pixelToGeo(point2D, 10, info)
 
         assertAll {
-            assertThat(actual.getLongitude()).isCloseTo(13.0, PRECISION)
-            assertThat(actual.getLatitude()).isCloseTo(52.0, PRECISION)
+            assertThat(actual.longitude).isCloseTo(13.0, PRECISION)
+            assertThat(actual.latitude).isCloseTo(52.0, PRECISION)
         }
     }
 

@@ -8,47 +8,53 @@ import kotlin.math.min
 const val TOO_LESS_POSITIONS = "The attribute 'geoPositions' cannot be null and must have 2 or more elements"
 const val INVALID_GEOBOUNDS = "GeoBounds is not valid"
 
-class GeoBounds {
+class GeoBounds(geoPositions: Set<GeoPosition>?) {
+    private val rectangles: Array<Rectangle2D>
+    val northWest: GeoPosition
+        get() = GeoPosition(rectangles[0].minX, rectangles[0].maxY)
+    val southEast: GeoPosition
+        get() {
+            val rectangle = if (rectangles.size > 1) rectangles[1] else rectangles[0]
+            return GeoPosition(rectangle.maxX, rectangle.minY)
+        }
 
-    private var rectangles: Array<Rectangle2D>? = null
-
-    constructor(minLat: Double, minLng: Double, maxLat: Double, maxLng: Double) {
-        setRect(minLat, minLng, maxLat, maxLng)
-    }
-
-    constructor(geoPositions: Set<GeoPosition>?) {
-        if (geoPositions == null || geoPositions.size < 2) throw IllegalStateException(TOO_LESS_POSITIONS)
+    init {
+        check(!(geoPositions == null || geoPositions.size < 2)) { TOO_LESS_POSITIONS }
         var (minLat, maxLat) = maxRange()
         var (minLng, maxLng) = maxRange()
         for (position in geoPositions) {
-            minLat = min(minLat, position.getLatitude())
-            minLng = min(minLng, position.getLongitude())
-            maxLat = max(maxLat, position.getLatitude())
-            maxLng = max(maxLng, position.getLongitude())
+            minLat = min(minLat, position.latitude)
+            minLng = min(minLng, position.longitude)
+            maxLat = max(maxLat, position.latitude)
+            maxLng = max(maxLng, position.longitude)
         }
-        setRect(minLat, minLng, maxLat, maxLng)
+        rectangles = setRect(minLat, minLng, maxLat, maxLng)
     }
 
-    private fun setRect(minLat: Double, minLng: Double, maxLat: Double, maxLng: Double) {
-        if (minLat >= maxLat) throw IllegalArgumentException(INVALID_GEOBOUNDS)
+    private fun setRect(
+        minLat: Double,
+        minLng: Double,
+        maxLat: Double,
+        maxLng: Double
+    ): Array<Rectangle2D> {
+        require(minLat < maxLat) { INVALID_GEOBOUNDS }
         if (minLng >= maxLng) {
             if (minLng > 0 && minLng < 180 && maxLng < 0) {
-                rectangles = arrayOf(
+                return arrayOf(
                         Rectangle2D.Double(minLng, minLat, 180 - minLng, maxLat - minLat),
                         Rectangle2D.Double(-180.0, minLat, maxLng + 180, maxLat - minLat))
             } else {
-                rectangles = arrayOf(Rectangle2D.Double(minLng, minLat, maxLng - minLng, maxLat - minLat))
-                throw IllegalArgumentException(INVALID_GEOBOUNDS)
+                return arrayOf(Rectangle2D.Double(minLng, minLat, maxLng - minLng, maxLat - minLat))
             }
         } else {
-            rectangles = arrayOf(Rectangle2D.Double(minLng, minLat, maxLng - minLng, maxLat - minLat))
+            return arrayOf(Rectangle2D.Double(minLng, minLat, maxLng - minLng, maxLat - minLat))
         }
     }
 
     fun intersects(other: GeoBounds): Boolean {
         var rv = false
-        for (r1 in rectangles!!) {
-            for (r2 in other.rectangles!!) {
+        for (r1 in rectangles) {
+            for (r2 in other.rectangles) {
                 rv = r1.intersects(r2)
                 if (rv) break
             }
@@ -56,13 +62,4 @@ class GeoBounds {
         }
         return rv
     }
-
-    val northWest: GeoPosition
-        get() = GeoPosition(rectangles!![0].minX, rectangles!![0].maxY)
-
-    val southEast: GeoPosition
-        get() {
-            val rectangle = if (rectangles!!.size > 1) rectangles!![1] else rectangles!![0]
-            return GeoPosition(rectangle.maxX, rectangle.minY)
-        }
 }
